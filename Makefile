@@ -7,7 +7,7 @@ BIN_DIR := bin
 all: test build
 
 # Build for host OS
-build: ui daemon
+build: ui daemon config
 
 # Build UI
 ui:
@@ -29,12 +29,67 @@ test:
 	@go test ./...
 	@echo "   ✔ All tests passed."
 
+config:
+	@echo "→ Generating default config.yaml..."
+	@mkdir -p $(BIN_DIR)
+	@printf '%s\n' \
+	  "version:" \
+	  "  name: GoIdleGuard" \
+	  "  version: 0.1.0" \
+	  "" \
+	  "scheduler:" \
+	  "  interval: \"5m\"" \
+	  "" \
+	  "idlePrevention:" \
+	  "  enabled: true" \
+	  "  interval: \"1s\"      # 模擬操作間隔時間" \
+	  "  mode: \"key\"       # 模擬模式，可選：key, mouse, mixed" \
+	  "" \
+	  "retryPolicy:" \
+	  "  retryInterval: \"1s\"" \
+	  "  maxRetries: 3" \
+	  "" \
+	  "logging:" \
+	  "  level: \"debug\"" \
+	  "  output: \"console\"   # 或指定檔案路徑" \
+	  "" \
+	  "workSchedule:" \
+	  "  monday:" \
+	  "    - start: \"08:00\"" \
+	  "      end:   \"12:00\"" \
+	  "    - start: \"13:00\"" \
+	  "      end:   \"17:00\"" \
+	  "  tuesday:" \
+	  "    - start: \"08:00\"" \
+	  "      end:   \"12:00\"" \
+	  "    - start: \"13:00\"" \
+	  "      end:   \"17:00\"" \
+	  "  wednesday:" \
+	  "    - start: \"08:00\"" \
+	  "      end:   \"12:00\"" \
+	  "    - start: \"13:00\"" \
+	  "      end:   \"17:00\"" \
+	  "  thursday:" \
+	  "    - start: \"08:00\"" \
+	  "      end:   \"12:00\"" \
+	  "    - start: \"13:00\"" \
+	  "      end:   \"17:00\"" \
+	  "  friday:" \
+	  "    - start: \"08:00\"" \
+	  "      end:   \"12:00\"" \
+	  "    - start: \"13:00\"" \
+	  "      end:   \"17:00\"" \
+	  "  saturday: []" \
+	  "  sunday:   []" \
+	> $(BIN_DIR)/config.yaml
+	@echo "   → $(BIN_DIR)/config.yaml created."
+
 # --------------------
 # Cross‑platform targets
 # --------------------
 
 # Linux amd64
-linux: linux-ui linux-daemon
+linux: linux-ui linux-daemon config
 
 linux-ui:
 	@echo "→ Building UI for Linux/amd64..."
@@ -49,7 +104,7 @@ linux-daemon:
 	@echo "   → $(BIN_DIR)/app-daemon-linux"
 
 # Windows amd64
-windows: windows-ui windows-daemon
+windows: windows-ui windows-daemon config
 
 windows-ui:
 	@echo "→ Building UI for Windows/amd64..."
@@ -64,7 +119,7 @@ windows-daemon:
 	@echo "   → $(BIN_DIR)/app-daemon.exe"
 
 # macOS amd64
-macos: macos-ui macos-daemon
+macos: macos-ui macos-daemon config
 
 macos-ui:
 	@echo "→ Building UI for macOS/amd64..."

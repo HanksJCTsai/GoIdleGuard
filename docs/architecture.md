@@ -74,10 +74,6 @@ project/
 │       │   └── WriteFile()     // 寫入資料到檔案
 │       └── utils_test.go       // 通用工具函式單元測試
 │
-├── scripts/                   
-│   ├── build.sh                // Linux/MacOS 建構腳本
-│   └── setup.ps1               // Windows 安裝與環境設定腳本
-│
 ├── docs/                      
 │   ├── architecture.md         // 系統架構總覽
 │   ├── design.md               // 詳細設計與介面規範
