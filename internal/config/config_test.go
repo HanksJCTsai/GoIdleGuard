@@ -106,11 +106,11 @@ func TestSaveConfig(t *testing.T) {
 			Version: "0.1.0",
 		},
 		Scheduler: SchedulerConfig{
-			Interval: "5m",
+			Interval: (1 * time.Minute),
 		},
 		IdlePrevention: IdlePreventionConfig{
 			Enabled:  true,
-			Interval: "10m",
+			Interval: (5 * time.Minute),
 			Mode:     "key",
 		},
 		Logging: LoggingConfig{
@@ -160,11 +160,11 @@ func TestValidateConfig_InvalidWorkSchedule(t *testing.T) {
 			Version: "0.1.0",
 		},
 		Scheduler: SchedulerConfig{
-			Interval: "5m",
+			Interval: (1 * time.Minute),
 		},
 		IdlePrevention: IdlePreventionConfig{
 			Enabled:  true,
-			Interval: "5m",
+			Interval: (5 * time.Minute),
 			Mode:     "key",
 		},
 		Logging: LoggingConfig{
@@ -195,11 +195,11 @@ func TestValidateConfig_InvalidIdlePreventionMode(t *testing.T) {
 			Version: "0.1.0",
 		},
 		Scheduler: SchedulerConfig{
-			Interval: "5m",
+			Interval: (1 * time.Minute),
 		},
 		IdlePrevention: IdlePreventionConfig{
 			Enabled:  true,
-			Interval: "5m",
+			Interval: (5 * time.Minute),
 			Mode:     "invalid_mode",
 		},
 		Logging: LoggingConfig{
@@ -235,11 +235,11 @@ func TestValidateConfig_InvalidRetryInterval(t *testing.T) {
 			Version: "0.1.0",
 		},
 		Scheduler: SchedulerConfig{
-			Interval: "5m",
+			Interval: (1 * time.Minute),
 		},
 		IdlePrevention: IdlePreventionConfig{
 			Enabled:  true,
-			Interval: "5m",
+			Interval: (5 * time.Minute),
 			Mode:     "key",
 		},
 		Logging: LoggingConfig{
@@ -270,11 +270,11 @@ func TestValidateConfig_InvalidSchedulerInterval(t *testing.T) {
 			Version: "0.1.0",
 		},
 		Scheduler: SchedulerConfig{
-			Interval: "5m",
+			Interval: (5 * time.Minute),
 		},
 		IdlePrevention: IdlePreventionConfig{
 			Enabled:  true,
-			Interval: "invalid", // 格式錯誤
+			Interval: (1 * time.Minute), // 格式錯誤
 			Mode:     "key",
 		},
 		Logging: LoggingConfig{
@@ -305,11 +305,11 @@ func TestValidateConfig_InvalidIdlePreventionInterval(t *testing.T) {
 			Version: "0.1.0",
 		},
 		Scheduler: SchedulerConfig{
-			Interval: "5m",
+			Interval: (5 * time.Minute),
 		},
 		IdlePrevention: IdlePreventionConfig{
 			Enabled:  true,
-			Interval: "invalid", // 格式錯誤
+			Interval: (1 * time.Minute), // 格式錯誤
 			Mode:     "key",
 		},
 		Logging: LoggingConfig{
@@ -340,11 +340,11 @@ func TestValidateConfig_ValidConfig(t *testing.T) {
 			Version: "1.0.0",
 		},
 		Scheduler: SchedulerConfig{
-			Interval: "5m",
+			Interval: (1 * time.Minute),
 		},
 		IdlePrevention: IdlePreventionConfig{
 			Enabled:  true,
-			Interval: "5m",
+			Interval: (5 * time.Minute),
 			Mode:     "mouse",
 		},
 		Logging: LoggingConfig{

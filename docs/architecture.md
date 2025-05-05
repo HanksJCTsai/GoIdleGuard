@@ -28,10 +28,6 @@ project/
 │   │   └── config_test.go        // Config 模組單元測試
 │   │
 │   ├── preventidle/             
-│   │   ├── idle_controller.go    // 整合防止閒置邏輯
-│   │   │   ├── StartIdlePrevention()   // 啟動防閒置作業
-│   │   │   ├── StopIdlePrevention()    // 停止模擬操作
-│   │   │   └── RestartIdlePrevention() // 設定更新後重啟流程
 │   │   ├── input_simulator.go    // 模擬輸入操作
 │   │   │   ├── SimulateKeyPress()  // 模擬鍵盤按鍵
 │   │   │   ├── SimulateMouseMove() // 模擬滑鼠移動
@@ -53,7 +49,6 @@ project/
 │       ├── time_manager.go       // 時間處理輔助函式
 │       │   ├── ParseTimeString() // 將字串轉成標準時間格式
 │       │   ├── IsTimeInRange()   // 檢查是否在指定時間區間
-│       │   └── CalculateNextInterval() // 計算下一次間隔
 │       └── scheduler_test.go     // 排程邏輯單元測試
 │
 ├── pkg/                        
@@ -66,13 +61,6 @@ project/
 │   │   └── logger_test.go      // 日誌模組測試
 │   │
 │   └── utils/                 
-│       ├── timeutils.go        // 時間格式化與解析工具
-│       │   ├── FormatTime()    // 格式化 time.Time 為字串
-│       │   └── ParseDuration() // 將字串轉換為 time.Duration
-│       ├── fileutils.go        // 檔案讀寫工具
-│       │   ├── ReadFile()      // 讀取檔案內容
-│       │   └── WriteFile()     // 寫入資料到檔案
-│       └── utils_test.go       // 通用工具函式單元測試
 │
 ├── docs/                      
 │   ├── architecture.md         // 系統架構總覽

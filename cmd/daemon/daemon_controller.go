@@ -1,7 +1,7 @@
-package daemon
+package main
 
 import (
-	"strconv"
+	"strings"
 	"time"
 
 	"github.com/HanksJCTsai/goidleguard/internal/config"
@@ -12,7 +12,6 @@ import (
 
 type Controller struct {
 	cfg        *config.APPConfig
-	idleCtl    *preventidle.IdleController
 	scheduler  *schedule.Scheduler
 	healthStop chan struct{}
 }
@@ -20,31 +19,40 @@ type Controller struct {
 func NewController(cfg *config.APPConfig) *Controller {
 	return &Controller{
 		cfg:        cfg,
-		idleCtl:    preventidle.NewIdleController(),
 		scheduler:  schedule.InitialScheduler(cfg),
 		healthStop: make(chan struct{}),
 	}
 }
-
 func (c *Controller) StartDaemon() {
-	logger.LogInfo("Starting daemon...")
-	// 啟動持續模擬輸入
-	c.idleCtl.StartIdlePrevention()
-
+	logger.LogInfo("StartDaemon: will wait for idle >=", c.cfg.IdlePrevention.Interval)
 	task := func() {
-		now := time.Now()
-		if !c.scheduler.CheckWorkTime(now) {
-			if err := preventidle.SimulateActivity(); err != nil {
-				logger.LogError("Scheduled SimulateActivity error:", err)
-			} else {
-				logger.LogInfo("Scheduled activity simulated")
+		if schedule.CheckWorkTime(c.cfg, time.Now()) {
+			logger.LogInfo("StartDaemon: idle threshold met, starting prevention")
+
+			idle, err := preventidle.GetIdleTime()
+			if err != nil {
+				logger.LogError("WaitForIdle:", err)
+				return
 			}
+			logger.LogInfo("WaitForIdle: idle=%v/%v", idle, c.cfg.IdlePrevention.Interval)
+
+			if idle >= c.cfg.IdlePrevention.Interval {
+				err := preventidle.SimulateActivity(c.cfg.IdlePrevention.Mode)
+				if err != nil {
+					logger.LogError("Scheduled SimulateActivity error:", err)
+					return
+				}
+			}
+		} else {
+			logger.LogInfo("It's not working time now: %s", strings.ToLower(time.Now().Weekday().String()))
+			idle, _ := preventidle.GetIdleTime()
+			logger.LogInfo("WaitForIdle: idle=%v/%v", idle, c.cfg.IdlePrevention.Interval)
 		}
 	}
 
 	c.scheduler.ScheduleTask(task)
 	// 啟動健康檢查
-	// go c.healthStop
+	go c.healthCheckLoop()
 }
 
 func (c *Controller) StopDaemon() {
@@ -53,7 +61,7 @@ func (c *Controller) StopDaemon() {
 	close(c.healthStop)
 	// 停排程與持續輸入模擬
 	c.scheduler.StopScheduler()
-	c.idleCtl.StopIdlePrevention()
+	// c.idleCtl.StopIdlePrevention()
 }
 
 func (c *Controller) RestartDaemon() {
@@ -67,17 +75,7 @@ func (c *Controller) RestartDaemon() {
 }
 
 func (c *Controller) healthCheckLoop() {
-	scheduler_interval, err := strconv.Atoi(c.cfg.Scheduler.Interval)
-	idle_interval, err := strconv.Atoi(c.cfg.IdlePrevention.Interval)
-	if err != nil {
-		logger.LogError("invalid idle prevention interval: %w", err)
-		return
-	}
-	if scheduler_interval <= 0 {
-		logger.LogError("idle prevention interval must be positive")
-	}
-
-	ticker := time.NewTicker(time.Duration(scheduler_interval) * time.Minute)
+	ticker := time.NewTicker(c.cfg.Scheduler.Interval)
 	defer ticker.Stop()
 	for {
 		select {
@@ -85,17 +83,19 @@ func (c *Controller) healthCheckLoop() {
 			logger.LogInfo("Health check stopped")
 			return
 		case <-ticker.C:
-			idleTime, err := preventidle.GetIdleTime()
-			if err != nil {
-				logger.LogError("HealthCheck: failed to get idle time:", err)
-				continue
-			}
-			// 如果閒置時間過長（例如 10 分鐘以上），可能代表模擬失效，嘗試重啟
-			if idleTime > time.Duration(idle_interval+1)*time.Minute {
-				logger.LogError("HealthCheck: idle time too long (", idleTime, "), restarting prevention")
-				c.RestartDaemon()
-			} else {
-				logger.LogInfo("HealthCheck: idle time healthy (", idleTime, ")")
+			if schedule.CheckWorkTime(c.cfg, time.Now()) {
+				idleTime, err := preventidle.GetIdleTime()
+				if err != nil {
+					logger.LogError("HealthCheck: failed to get idle time:", err)
+					continue
+				}
+				// 如果閒置時間過長（例如 10 分鐘以上），可能代表模擬失效，嘗試重啟
+				if idleTime > c.cfg.IdlePrevention.Interval+(5*time.Minute) {
+					logger.LogError("HealthCheck: idle time too long (", idleTime, "), restarting prevention")
+					c.RestartDaemon()
+				} else {
+					logger.LogInfo("HealthCheck: idle time healthy (", idleTime, ")")
+				}
 			}
 		}
 	}

@@ -2,32 +2,36 @@ package preventidle
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/HanksJCTsai/goidleguard/pkg/logger"
 )
 
-func SimulateKeyPress() error {
-	if err := CallSendInput("key"); err != nil {
-		return fmt.Errorf("SimulateKeyPress failed: %w", err)
-	}
-	logger.LogInfo("Simulated key press")
-	return nil
-}
+func SimulateActivity(mode string) error {
 
-func SimulateMouseMove() error {
-	if err := CallSendInput("mouse"); err != nil {
-		return fmt.Errorf("SimulateMouseMove failed: %w", err)
+	var actions []SimulateAction
+	switch strings.ToUpper(mode) {
+	default:
+	case "MIXED":
+		actions = []SimulateAction{
+			{"key", "key press"},
+			{"mouse", "mouse move"},
+		}
+	case "KEY":
+		actions = []SimulateAction{
+			{"key", "key press"},
+		}
+	case "MOUSE":
+		actions = []SimulateAction{
+			{"mouse", "mouse move"},
+		}
 	}
-	logger.LogInfo("Simulated mouse move")
-	return nil
-}
 
-func SimulateActivity() error {
-	// if err := SimulateKeyPress(); err != nil {
-	// 	return err
-	// }
-	if err := SimulateMouseMove(); err != nil {
-		return err
+	for _, a := range actions {
+		if err := CallSendInput(a.inputType); err != nil {
+			return fmt.Errorf("simulate %s failed: %w", a.actionName, err)
+		}
+		logger.LogInfo("Simulated %s", a.actionName)
 	}
 	logger.LogInfo("Simulated combined activity")
 	return nil

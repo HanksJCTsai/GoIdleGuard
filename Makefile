@@ -2,6 +2,7 @@
 
 BIN_DIR := bin
 
+
 .PHONY: all build linux windows macos ui daemon test clean
 
 all: test build
@@ -10,18 +11,45 @@ all: test build
 build: ui daemon config
 
 # Build UI
-ui:
+ui:config
 	@echo "→ Building UI (host OS)..."
 	@mkdir -p $(BIN_DIR)
 	@go build -o $(BIN_DIR)/app-ui ./cmd/main
 	@echo "   → $(BIN_DIR)/app-ui"
 
 # Build Daemon
-daemon:
+daemon: config
 	@echo "→ Building Daemon (host OS)..."
 	@mkdir -p $(BIN_DIR)
 	@go build -o $(BIN_DIR)/app-daemon ./cmd/daemon
-	@echo "   → $(BIN_DIR)/app-daemon"
+	@echo "   → $(BIN_DIR)/app-daemon created."
+
+# ----------------------------------------
+# Debug targets
+# ----------------------------------------
+
+# build-debug: compile the daemon with debug information
+#   -gcflags "all=-N -l" disables optimizations and inlining for easier single-stepping
+debug-build: config
+	@echo "→ Building daemon with debug info…"
+	@mkdir -p $(BIN_DIR)
+	@go build -gcflags "all=-N -l" \
+		-o $(BIN_DIR)/app-daemon-debug \
+		./cmd/daemon
+	@echo "   → $(BIN_DIR)/app-daemon-debug created."
+
+# debug: run the compiled binary under Delve in interactive mode
+# passes the generated config.yaml as an argument
+debug-config: debug-build
+	@echo "🐛 Launching Delve in interactive mode…"
+	@dlv exec $(BIN_DIR)/app-daemon-debug -- -config=$(BIN_DIR)/config.yaml
+
+# debug-headless: start Delve in headless mode for remote attachment
+debug-headless:
+	@echo "🐛 Launching Delve in headless mode"
+	@dlv debug github.com/HanksJCTsai/goidleguard/cmd/daemon/ -- \
+		-config=$(BIN_DIR)/config.yaml \
+		--log
 
 # Run tests
 test:
@@ -29,6 +57,7 @@ test:
 	@go test ./...
 	@echo "   ✔ All tests passed."
 
+# Create config
 config:
 	@echo "→ Generating default config.yaml..."
 	@mkdir -p $(BIN_DIR)
@@ -42,7 +71,7 @@ config:
 	  "" \
 	  "idlePrevention:" \
 	  "  enabled: true" \
-	  "  interval: \"1s\"      # 模擬操作間隔時間" \
+	  "  interval: \"10m\"      # 模擬操作間隔時間" \
 	  "  mode: \"key\"       # 模擬模式，可選：key, mouse, mixed" \
 	  "" \
 	  "retryPolicy:" \

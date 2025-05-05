@@ -40,30 +40,16 @@ func (s *Scheduler) ScheduleTask(task func()) {
 	s.WG.Add(1)
 	go func() {
 		defer s.WG.Done()
-		var now time.Time
+
+		ticker := time.NewTicker(s.Config.Scheduler.Interval)
+		defer ticker.Stop()
+
 		for {
 			select {
 			case <-s.StopChan:
 				return
-			default:
-				now = time.Now()
-				if !s.CheckWorkTime(now) {
-					task()
-				}
-
-				interval, err := CalculateNextInterval(s.Config)
-				if err != nil {
-					return
-				}
-
-				timer := time.NewTimer(interval)
-				select {
-				case <-timer.C:
-					// 繼續下一輪任務檢查
-				case <-s.StopChan:
-					timer.Stop()
-					return
-				}
+			case <-ticker.C:
+				task()
 			}
 		}
 	}()

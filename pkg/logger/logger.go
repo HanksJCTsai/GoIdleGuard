@@ -3,9 +3,11 @@ package logger
 import (
 	"log"
 	"os"
+	"sync"
 )
 
 var (
+	loggerOnce  sync.Once
 	infoLogger  *log.Logger
 	debugLogger *log.Logger
 	errorLogger *log.Logger
@@ -20,24 +22,24 @@ func InitLogger() {
 
 // LogInfo 輸出 Info 級別的日誌訊息。
 func LogInfo(v ...interface{}) {
-	if infoLogger == nil {
+	loggerOnce.Do(func() {
 		InitLogger()
-	}
+	})
 	infoLogger.Println(v...)
 }
 
 // LogDebug 輸出 Debug 級別的日誌訊息。
 func LogDebug(v ...interface{}) {
-	if debugLogger == nil {
+	loggerOnce.Do(func() {
 		InitLogger()
-	}
+	})
 	debugLogger.Println(v...)
 }
 
 // LogError 輸出 Error 級別的日誌訊息。
 func LogError(v ...interface{}) {
-	if errorLogger == nil {
+	loggerOnce.Do(func() {
 		InitLogger()
-	}
+	})
 	errorLogger.Println(v...)
 }

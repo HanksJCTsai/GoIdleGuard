@@ -1,5 +1,7 @@
 package config
 
+import "time"
+
 // Config 定義了從 config.yaml 讀取的整個設定結構
 type APPConfig struct {
 	Version        VersionConfig        `yaml:"version" json:"version"`
@@ -16,13 +18,13 @@ type VersionConfig struct {
 }
 
 type IdlePreventionConfig struct {
-	Enabled  bool   `yaml:"enabled" json:"enabled"`
-	Interval string `yaml:"interval" json:"interval"` // 例如 "5m"
-	Mode     string `yaml:"mode" json:"mode"`         // 可選值： "key"、"mouse"、"mixed"
+	Enabled  bool          `yaml:"enabled" json:"enabled"`
+	Interval time.Duration `yaml:"interval" json:"interval"` // 例如 "5m"
+	Mode     string        `yaml:"mode" json:"mode"`         // 可選值： "key"、"mouse"、"mixed"
 }
 
 type SchedulerConfig struct {
-	Interval string `yaml:"interval" json:"interval"` // 例如 "10m"
+	Interval time.Duration `yaml:"interval" json:"interval"` // 例如 "10m"
 }
 
 type LoggingConfig struct {

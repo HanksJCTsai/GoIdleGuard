@@ -45,13 +45,18 @@ func SaveConfig(path string, cfg *APPConfig) error {
 
 // ValidateConfig 驗證設定檔中的各欄位格式與範圍是否正確。
 func ValidateConfig(cfg *APPConfig) error {
-	if _, err := time.ParseDuration(cfg.Scheduler.Interval); err != nil {
-		return fmt.Errorf("invalid Scheduler.interval format (%s): %w", cfg.Scheduler.Interval, err)
+	if cfg.Scheduler.Interval <= 0 {
+		return fmt.Errorf("invalid Scheduler.interval must be >0 (%s)", cfg.Scheduler.Interval)
 	}
 
 	// 驗證 IdlePrevention 的 Interval 格式
-	if _, err := time.ParseDuration(cfg.IdlePrevention.Interval); err != nil {
-		return fmt.Errorf("invalid idlePrevention.interval format (%s): %w", cfg.IdlePrevention.Interval, err)
+	if cfg.IdlePrevention.Interval <= 0 {
+		return fmt.Errorf("invalid idlePrevention.interval must be >0 (%s)", cfg.IdlePrevention.Interval)
+	}
+
+	if cfg.Scheduler.Interval >= cfg.IdlePrevention.Interval {
+		return fmt.Errorf("IdlePrevention.tick (%v) must be <= IdlePrevention.interval (%v)",
+			cfg.Scheduler.Interval, cfg.IdlePrevention.Interval)
 	}
 
 	// 驗證 IdlePrevention 的 Mode 值是否正確

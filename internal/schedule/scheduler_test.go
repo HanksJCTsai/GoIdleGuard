@@ -29,18 +29,6 @@ func TestIsTimeInRange(t *testing.T) {
 	}
 }
 
-func TestCalculateNextInterval(t *testing.T) {
-	cfg := &config.APPConfig{
-		Scheduler: config.SchedulerConfig{
-			Interval: "10m",
-		},
-	}
-	interval, err := CalculateNextInterval(cfg)
-	if interval <= 0 || err != nil {
-		t.Errorf("Expected positive interval, got %v", interval)
-	}
-}
-
 func TestCheckWorkTime(t *testing.T) {
 	// 建立一組包含 monday 工作時段的配置
 	cfg := &config.APPConfig{

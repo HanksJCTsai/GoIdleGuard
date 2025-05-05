@@ -1,11 +1,10 @@
-package daemon
+package main
 
 import (
 	"testing"
 	"time"
 
 	"github.com/HanksJCTsai/goidleguard/internal/config"
-	"github.com/HanksJCTsai/goidleguard/internal/preventidle"
 	"github.com/HanksJCTsai/goidleguard/internal/schedule"
 )
 
@@ -14,10 +13,10 @@ func TestDaemonController_StartAndStop(t *testing.T) {
 	cfg := &config.APPConfig{
 		Version: config.VersionConfig{Name: "TestApp",
 			Version: "0.1.0"},
-		Scheduler: config.SchedulerConfig{Interval: "5m"},
+		Scheduler: config.SchedulerConfig{Interval: 5 * time.Minute},
 		IdlePrevention: config.IdlePreventionConfig{
 			Enabled:  true,
-			Interval: "1s", // 縮短執行間隔，方便測試
+			Interval: (1 * time.Second), // 縮短執行間隔，方便測試
 			Mode:     "key",
 		},
 		Logging: config.LoggingConfig{
@@ -57,7 +56,6 @@ func TestDaemonController_StartAndStop(t *testing.T) {
 	// 建立真實的 Controller 實例
 	ctrl := &Controller{
 		cfg:        cfg,
-		idleCtl:    preventidle.NewIdleController(),
 		scheduler:  schedule.InitialScheduler(cfg),
 		healthStop: make(chan struct{}),
 	}

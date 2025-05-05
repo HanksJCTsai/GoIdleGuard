@@ -4,11 +4,11 @@ version:
   version: "1.0.0"
 
 scheduler:
-  interval: "10"
+  interval: "1s"
 
 idlePrevention:
   enabled: true
-  interval: "5"      # 模擬操作間隔時間
+  interval: "5s"      # 模擬操作間隔時間
   mode: "mixed"       # 模擬模式，可選：key, mouse, mixed
 
 logging:
@@ -17,7 +17,7 @@ logging:
 
 retryPolicy:
   maxRetries: 3
-  retryInterval: "10"
+  retryInterval: "1s"
 
 workSchedule:
   monday:
@@ -44,6 +44,12 @@ workSchedule:
     - start: "08:00"
       end: "12:00"
     - start: "13:00"
-      end: "17:00"
-  saturday: []
+      end: "18:00"
+  saturday: 
+    - start: "08:00"
+      end: "12:00"
+    - start: "13:00"
+      end: "18:00"
   sunday: []
+
+
